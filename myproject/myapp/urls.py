@@ -1,3 +1,4 @@
+from .views import CurrentUserView, DashboardStatsView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
@@ -42,4 +43,12 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/register/', views.RegisterView.as_view(), name='api-register'),
     path('api/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+
+
+
+
+    path('api/current-user/', CurrentUserView.as_view(), name='current-user'),
+    path('api/dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
 ]
+
+

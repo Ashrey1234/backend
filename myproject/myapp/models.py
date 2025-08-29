@@ -13,7 +13,59 @@ class Document(models.Model):
 from django.contrib.auth.models import AbstractUser
 
 # Custom User
+# class User(AbstractUser):
+
+
+#        research_type = models.CharField(
+#         max_length=100,
+#         choices=[
+#             ('Environment & Marine', 'Environment & Marine'),
+#             ('Aquatic Organisms', 'Aquatic Organisms'),
+#             ('Fisheries Research', 'Fisheries Research')
+#         ],
+#         blank=True,
+#         null=True
+#     )
+
+#     ROLE_CHOICES = [
+#         ('Admin', 'Admin'),
+#         ('Officer', 'Officer'),
+#         ('Researcher', 'Researcher'),
+#     ]
+#     type = models.CharField(max_length=50, choices=[('Student','Student'),('University','University'),('Institute','Institute'),('Independent','Independent')], blank=True, null=True)
+#     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+#     country = models.CharField(max_length=100, blank=True, null=True)
+#     groups = models.ManyToManyField(
+#         'auth.Group',
+#         related_name='myapp_user_groups',
+#         blank=True,
+#         help_text='The groups this user belongs to.',
+#         verbose_name='groups'
+#     )
+#     user_permissions = models.ManyToManyField(
+#         'auth.Permission',
+#         related_name='myapp_user_permissions',
+#         blank=True,
+#         help_text='Specific permissions for this user.',
+#         verbose_name='user permissions'
+#     )
+
+
+
 class User(AbstractUser):
+    research_type = models.CharField(
+        max_length=100,
+        choices=[
+            ('Environment & Marine', 'Environment & Marine'),
+            ('Aquatic Organisms', 'Aquatic Organisms'),
+            ('Fisheries Research', 'Fisheries Research')
+        ],
+        blank=True,
+        null=True
+    )
+    phone_number = models.CharField(max_length=20, blank=True, null=True)  # Add this line
+
+
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
         ('Officer', 'Officer'),
@@ -115,14 +167,31 @@ class Payment(models.Model):
         fee = fee_table[key_nat][key_cat][key_prog]
         return fee
 
+# class Application(models.Model):
+#     researcher = models.ForeignKey(User, on_delete=models.CASCADE)
+#     title = models.CharField(max_length=300)
+#     category = models.CharField(max_length=100)
+#     start_date = models.DateField()
+#     end_date = models.DateField()
+#     status = models.CharField(max_length=20, choices=[('Pending','Pending'),('Approved','Approved'),('Rejected','Rejected')], default='Pending')
+#     officer_feedback = models.TextField(blank=True, null=True)
+
+
 class Application(models.Model):
     researcher = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=300)
     category = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
-    status = models.CharField(max_length=20, choices=[('Pending','Pending'),('Approved','Approved'),('Rejected','Rejected')], default='Pending')
+    status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')],
+        default='Pending'
+    )
     officer_feedback = models.TextField(blank=True, null=True)
+    submitted = models.CharField(max_length=100, blank=True, null=True)   # Add this line
+    important = models.CharField(max_length=100, blank=True, null=True)   # Add this line
+
 
 class Attachment(models.Model):
     application = models.ForeignKey(Application, on_delete=models.CASCADE)

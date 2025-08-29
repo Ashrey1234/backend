@@ -1,9 +1,17 @@
 from .models import Document
 from rest_framework import serializers
 class DocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Document
-        fields = ['id', 'title', 'file', 'uploaded_at']
+        fields = ['id', 'title', 'uploaded_at', 'file', 'file_url']  # add file_url
+
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        if obj.file and hasattr(obj.file, 'url'):
+            return request.build_absolute_uri(obj.file.url) if request else obj.file.url
+        return None
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -13,8 +21,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'username', 'password', 'email', 'first_name', 'last_name', 'role', 'type', 'country']
-
+        fields = [
+            'id', 'username', 'password', 'email', 'first_name', 'last_name',
+            'role', 'type', 'country', 'research_type', 'phone_number'  # Add phone_number
+        ]
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = get_user_model().objects.create(**validated_data)
@@ -24,10 +34,28 @@ class RegisterSerializer(serializers.ModelSerializer):
 from rest_framework import serializers
 from .models import User, ResearcherProfile, Payment, Application, Attachment, Notification, Certificate
 
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = [
+#             'id', 'username', 'email', 'first_name', 'last_name',
+#             'role', 'type', 'country', 'is_active', 'is_staff', 'is_superuser',
+#             'research_type'  # <-- Add this
+#         ]
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'type', 'country', 'is_active', 'is_staff', 'is_superuser']
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'role', 'type', 'country', 'is_active', 'is_staff', 'is_superuser',
+            'research_type', 'phone_number'  # Add phone_number here
+        ]
+
+
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'type', 'country', 'is_active', 'is_staff', 'is_superuser']
 
 class ResearcherProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,10 +68,41 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ['id', 'researcher', 'research_type', 'control_number', 'amount', 'status', 'generated_date', 'expiry_date']
         read_only_fields = ['control_number', 'amount']
 
+# class ApplicationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Application
+#         fields = ['id', 'researcher', 'title', 'category', 'start_date', 'end_date', 'status', 'officer_feedback']
+
+
+# class ApplicationSerializer(serializers.ModelSerializer):
+#     applicant_name = serializers.CharField(source='researcher.get_full_name', read_only=True)
+#     # au tumia 'researcher.username' kama hutumii majina kamili
+
+#     class Meta:
+#         model = Application
+#         fields = [
+#             'id', 'researcher', 'applicant_name', 'title', 'category',
+#             'start_date', 'end_date', 'status', 'officer_feedback'
+#         ]
+
+
+
 class ApplicationSerializer(serializers.ModelSerializer):
+    applicant_name = serializers.CharField(source='researcher.get_full_name', read_only=True)
+
     class Meta:
         model = Application
-        fields = ['id', 'researcher', 'title', 'category', 'start_date', 'end_date', 'status', 'officer_feedback']
+        fields = [
+            'id', 'researcher', 'applicant_name', 'title', 'category',
+            'start_date', 'end_date', 'status', 'officer_feedback',
+            'submitted', 'important'
+        ]
+
+
+
+
+
+
 
 class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,3 +118,13 @@ class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificate
         fields = ['id', 'application', 'certificate_number', 'file_path', 'issued_date']
+
+
+
+
+def create(self, validated_data):
+    password = validated_data.pop('password')
+    user = get_user_model().objects.create(**validated_data)
+    user.set_password(password)
+    user.save()
+    return user
