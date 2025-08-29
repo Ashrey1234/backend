@@ -16,6 +16,22 @@ class DocumentSerializer(serializers.ModelSerializer):
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
+# class RegisterSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only=True)
+
+#     class Meta:
+#         model = get_user_model()
+#         fields = [
+#             'id', 'username', 'password', 'email', 'first_name', 'last_name',
+#             'role', 'type', 'country', 'research_type', 'phone_number'  # Add phone_number
+#         ]
+#     def create(self, validated_data):
+#         password = validated_data.pop('password')
+#         user = get_user_model().objects.create(**validated_data)
+#         user.set_password(password)
+#         user.save()
+#         return user
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -23,14 +39,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = [
             'id', 'username', 'password', 'email', 'first_name', 'last_name',
-            'role', 'type', 'country', 'research_type', 'phone_number'  # Add phone_number
+            'role', 'type', 'country', 'research_type', 'phone_number'
         ]
+
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = get_user_model().objects.create(**validated_data)
         user.set_password(password)
         user.save()
         return user
+
 from rest_framework import serializers
 from .models import User, ResearcherProfile, Payment, Application, Attachment, Notification, Certificate
 
@@ -122,9 +140,9 @@ class CertificateSerializer(serializers.ModelSerializer):
 
 
 
-def create(self, validated_data):
-    password = validated_data.pop('password')
-    user = get_user_model().objects.create(**validated_data)
-    user.set_password(password)
-    user.save()
-    return user
+# def create(self, validated_data):
+#     password = validated_data.pop('password')
+#     user = get_user_model().objects.create(**validated_data)
+#     user.set_password(password)
+#     user.save()
+#     return user
