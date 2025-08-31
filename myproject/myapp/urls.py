@@ -1,9 +1,12 @@
+from django.contrib.auth import views as auth_views
+from .views import ForgotPasswordView, ResetPasswordView
 from .views import CurrentUserView, DashboardStatsView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
+    TokenBlacklistView,
 )
 from . import views
 
@@ -16,8 +19,6 @@ router.register(r'applications', views.ApplicationViewSet)
 router.register(r'attachments', views.AttachmentViewSet)
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'certificates', views.CertificateViewSet)
-
-from rest_framework_simplejwt.views import TokenBlacklistView
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -38,17 +39,43 @@ urlpatterns = [
     path('api/users/<int:pk>/', views.UserViewSet.as_view({'get': 'retrieve'}), name='user-detail'),
     # Explicit document endpoints
     path('api/documents/', views.DocumentViewSet.as_view({'get': 'list'}), name='document-list'),
-    path('api/documents/<int:pk>/', views.DocumentViewSet.as_view({'get': 'retrieve'}), name='document-detail'),
+
+    # JWT Auth endpoints
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/register/', views.RegisterView.as_view(), name='api-register'),
     path('api/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
 
-
-
-
+    # Registration and custom endpointsvate
+    
+    path('api/register/', views.RegisterView.as_view(), name='api-register'),
     path('api/current-user/', CurrentUserView.as_view(), name='current-user'),
     path('api/dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+
+
+
+
+
+    path('api/password-reset/', ForgotPasswordView.as_view(), name='password-reset'),
+    path('api/password-reset-confirm/', ResetPasswordView.as_view(), name='password-reset-confirm'),
+
+
+
+    path('password-reset/', auth_views.PasswordResetView.as_view(
+        email_template_name='registration/password_reset_email.html',
+        success_url='/password-reset/done/',
+        subject_template_name='registration/password_reset_subject.txt',
+        extra_email_context={'frontend_url': 'http://localhost:5173/reset-password'}
+    ), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        success_url='/reset/done/'
+    ), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
+
+
+
+
+
 
 

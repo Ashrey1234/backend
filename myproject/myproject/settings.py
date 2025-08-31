@@ -145,3 +145,39 @@ REST_FRAMEWORK = {
 
 
 
+
+
+# ALLOWED_HOSTS = [
+#     'localhost',
+#     '127.0.0.1',
+#     '192.168.1.128',  # Your computer's IP address
+#     '*',  # Allow all for development (remove in production)
+# ]
+
+
+
+
+
+# # Updated CORS settings for network access
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+#     "http://192.168.1.237:5173",
+# ]
+
+
+
+
+DEFAULT_FROM_EMAIL = "ashreysalum02@email.com"
+FRONTEND_URL = "http://localhost:5173"  # au domain yako ya frontend
+
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "ashreysalum02@gmail.com"
+EMAIL_HOST_PASSWORD = "eivd apmp snmx iwkx"  # Use App Password, not your Gmail password!
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

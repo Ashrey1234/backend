@@ -52,6 +52,46 @@ from django.contrib.auth.models import AbstractUser
 
 
 
+# class User(AbstractUser):
+#     research_type = models.CharField(
+#         max_length=100,
+#         choices=[
+#             ('Environment & Marine', 'Environment & Marine'),
+#             ('Aquatic Organisms', 'Aquatic Organisms'),
+#             ('Fisheries Research', 'Fisheries Research')
+#         ],
+#         blank=True,
+#         null=True
+#     )
+#     phone_number = models.CharField(max_length=20, blank=True, null=True)  # Add this line
+
+
+#     ROLE_CHOICES = [
+#         ('Admin', 'Admin'),
+#         ('Officer', 'Officer'),
+#         ('Researcher', 'Researcher'),
+#     ]
+#     type = models.CharField(max_length=50, choices=[('Student','Student'),('University','University'),('Institute','Institute'),('Independent','Independent')], blank=True, null=True)
+#     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+#     country = models.CharField(max_length=100, blank=True, null=True)
+#     groups = models.ManyToManyField(
+#         'auth.Group',
+#         related_name='myapp_user_groups',
+#         blank=True,
+#         help_text='The groups this user belongs to.',
+#         verbose_name='groups'
+#     )
+#     user_permissions = models.ManyToManyField(
+#         'auth.Permission',
+#         related_name='myapp_user_permissions',
+#         blank=True,
+#         help_text='Specific permissions for this user.',
+#         verbose_name='user permissions'
+#     )
+
+
+
+
 class User(AbstractUser):
     research_type = models.CharField(
         max_length=100,
@@ -63,16 +103,30 @@ class User(AbstractUser):
         blank=True,
         null=True
     )
-    phone_number = models.CharField(max_length=20, blank=True, null=True)  # Add this line
-
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
 
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
         ('Officer', 'Officer'),
         ('Researcher', 'Researcher'),
     ]
-    type = models.CharField(max_length=50, choices=[('Student','Student'),('University','University'),('Institute','Institute'),('Independent','Independent')], blank=True, null=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    type = models.CharField(
+        max_length=50,
+        choices=[
+            ('Student','Student'),
+            ('University','University'),
+            ('Institute','Institute'),
+            ('Independent','Independent')
+        ],
+        blank=True,  # <-- make optional
+        null=True    # <-- make optional
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        blank=True,  # <-- make optional
+        null=True    # <-- make optional
+    )
     country = models.CharField(max_length=100, blank=True, null=True)
     groups = models.ManyToManyField(
         'auth.Group',
@@ -88,6 +142,7 @@ class User(AbstractUser):
         help_text='Specific permissions for this user.',
         verbose_name='user permissions'
     )
+
 
 class ResearcherProfile(models.Model):
     researcher = models.OneToOneField(User, on_delete=models.CASCADE)
