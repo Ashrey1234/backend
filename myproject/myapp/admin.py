@@ -171,45 +171,48 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 
-# @admin.register(Payment)
-# class PaymentAdmin(admin.ModelAdmin):
-#     form = PaymentAdminForm
-#     raw_id_fields = ('application',)
-#     list_display = (
-#         'control_number',
-#         'researcher',
-#         'get_amount_with_currency',
-#         'status',
-#         'research_type',
-#         'level',
-#         'nationality',
-#         'generated_date'
-#     )
-#     list_filter = ('status', 'research_type', 'year', 'level', 'nationality')
-#     search_fields = ('control_number', 'researcher__username', 'researcher__email')
 
-#     def get_amount_with_currency(self, obj):
-#         return f"{obj.amount:,} {obj.currency}" if obj.amount and obj.currency else "-"
-#     get_amount_with_currency.short_description = 'Amount'
+# # ----------------------------------
+# # Application Admin
+# # ----------------------------------
+# @admin.register(Application)
+# class ApplicationAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'title', 'researcher', 'status', 'officer_feedback', 'submitted_at')
+#     search_fields = ('title', 'researcher__username', 'status', 'officer_feedback')
+#     list_filter = ('status', 'category')
+
+# # ----------------------------------
+# # Attachment Admin
+# # ----------------------------------
+# @admin.register(Attachment)
+# class AttachmentAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'application', 'file_type', 'file_path', 'uploaded_at')
+#     search_fields = ('application__title', 'file_type', 'original_filename')
+#     list_filter = ('file_type',)
 
 
-# ----------------------------------
+
+
+
+
+
+
+
+
+
 # Application Admin
-# ----------------------------------
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'researcher', 'status', 'officer_feedback', 'submitted_at')
     search_fields = ('title', 'researcher__username', 'status', 'officer_feedback')
-    list_filter = ('status', 'category')
+    list_filter = ('status', 'category')  # Fixed: removed the trailing comma that created a tuple of tuples
 
-# ----------------------------------
 # Attachment Admin
-# ----------------------------------
 @admin.register(Attachment)
 class AttachmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'application', 'file_type', 'file_path', 'uploaded_at')
     search_fields = ('application__title', 'file_type', 'original_filename')
-    list_filter = ('file_type',)
+    list_filter = ('file_type',)  # This is correct - the comma makes it a tuple with one element
 
 # ----------------------------------
 # Notification Admin

@@ -491,5 +491,119 @@ def create_payment_simple(request):
 
 
 
+# ----------------------------
+# Function-Based Views
+# ----------------------------
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import Application, Attachment
+from .serializers import ApplicationSerializer, AttachmentSerializer
 
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def application_list(request):
+    if request.method == 'GET':
+        applications = Application.objects.filter(researcher=request.user)
+        serializer = ApplicationSerializer(applications, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = ApplicationSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def application_detail(request, pk):
+    application = get_object_or_404(Application, pk=pk, researcher=request.user)
+    
+    if request.method == 'GET':
+        serializer = ApplicationSerializer(application)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = ApplicationSerializer(application, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    
+    elif request.method == 'DELETE':
+        application.delete()
+        return Response(status=204)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def application_submit(request, pk):
+    application = get_object_or_404(Application, pk=pk, researcher=request.user)
+    if application.status == 'Draft':
+        application.status = 'Pending'
+        application.submitted_at = timezone.now()
+        application.save()
+        return Response({'status': 'application submitted'})
+    return Response({'error': 'Application already submitted'}, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def application_approve(request, pk):
+    if not request.user.is_staff:
+        return Response(status=403)
+    
+    application = get_object_or_404(Application, pk=pk)
+    application.status = 'Approved'
+    application.save()
+    return Response({'status': 'application approved'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def application_reject(request, pk):
+    if not request.user.is_staff:
+        return Response(status=403)
+    
+    application = get_object_or_404(Application, pk=pk)
+    application.status = 'Rejected'
+    application.officer_feedback = request.data.get('feedback', '')
+    application.save()
+    return Response({'status': 'application rejected'})
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def attachment_list(request, application_pk):
+    application = get_object_or_404(Application, pk=application_pk, researcher=request.user)
+    
+    if request.method == 'GET':
+        attachments = Attachment.objects.filter(application=application)
+        serializer = AttachmentSerializer(attachments, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = AttachmentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(application=application)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def attachment_detail(request, application_pk, pk):
+    application = get_object_or_404(Application, pk=application_pk, researcher=request.user)
+    attachment = get_object_or_404(Attachment, pk=pk, application=application)
+    
+    if request.method == 'GET':
+        serializer = AttachmentSerializer(attachment)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = AttachmentSerializer(attachment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    
+    elif request.method == 'DELETE':
+        attachment.delete()
+        return Response(status=204)

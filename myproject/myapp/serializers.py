@@ -254,3 +254,46 @@ class GeneratePaymentSerializer(serializers.Serializer):
 
 
 
+
+
+
+
+
+
+
+# ----------------------------
+# Serializers
+# ----------------------------
+from rest_framework import serializers
+from .models import Application, Attachment
+
+class AttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = '__all__'
+        read_only_fields = ('application', 'uploaded_at', 'original_filename', 'file_size')
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    attachments = AttachmentSerializer(many=True, read_only=True)
+    status = serializers.CharField(read_only=True)  # Status changes should be handled by officers
+    officer_feedback = serializers.CharField(read_only=True)  # Only officers can set feedback
+
+    class Meta:
+        model = Application
+        fields = '__all__'
+        read_only_fields = ('researcher', 'created_at', 'updated_at', 'submitted_at')
+
+    def create(self, validated_data):
+        # Set the current user as researcher
+        validated_data['researcher'] = self.context['request'].user
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Handle submission timestamp
+        if 'status' in validated_data and validated_data['status'] == 'Pending':
+            validated_data['submitted_at'] = timezone.now()
+        return super().update(instance, validated_data)
+
+
+
+

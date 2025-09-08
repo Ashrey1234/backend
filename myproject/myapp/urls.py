@@ -110,6 +110,15 @@ urlpatterns = [
     path('api/payments/generate/', views.generate_payment, name='generate-payment'),
 
 
+    path('api/applications/', views.application_list, name='application-list'),
+    path('api/applications/<int:pk>/', views.application_detail, name='application-detail'),
+    path('api/applications/<int:pk>/submit/', views.application_submit, name='application-submit'),
+    path('api/applications/<int:pk>/approve/', views.application_approve, name='application-approve'),
+    path('api/applications/<int:pk>/reject/', views.application_reject, name='application-reject'),
+    path('api/applications/<int:application_pk>/attachments/', views.attachment_list, name='attachment-list'),
+    path('api/applications/<int:application_pk>/attachments/<int:pk>/', views.attachment_detail, name='attachment-detail'),
+
+
 
  path('api/researcher-profiles/me/', views.ResearcherProfileMeView.as_view(), name='researcher-profile-me'),
 ]
