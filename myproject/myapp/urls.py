@@ -1,7 +1,18 @@
+# from .views import ResearcherProfileDetail
 from django.contrib.auth import views as auth_views
 from .views import ForgotPasswordView, ResetPasswordView
 from .views import CurrentUserView, DashboardStatsView
+
+
+from .views import MyTokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
+
+# from .views import PaymentListCreateView, PaymentDetailView
+from . import views 
+
 from django.urls import path, include
+# from .views import UserFiveViewSet, UserBasicViewSet
+# from .views import UserFiveViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -14,11 +25,18 @@ router = DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'documents', views.DocumentViewSet)
 router.register(r'researcher-profiles', views.ResearcherProfileViewSet)
-router.register(r'payments', views.PaymentViewSet)
+# router.register(r'payments', views.PaymentViewSet)
 router.register(r'applications', views.ApplicationViewSet)
 router.register(r'attachments', views.AttachmentViewSet)
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'certificates', views.CertificateViewSet)
+
+
+
+
+
+
+
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -31,8 +49,7 @@ urlpatterns = [
     path('api/certificates/<int:pk>/', views.CertificateViewSet.as_view({'get': 'retrieve'}), name='certificate-detail'),
     path('api/notifications/', views.NotificationViewSet.as_view({'get': 'list'}), name='notification-list'),
     path('api/notifications/<int:pk>/', views.NotificationViewSet.as_view({'get': 'retrieve'}), name='notification-detail'),
-    path('api/payments/', views.PaymentViewSet.as_view({'get': 'list'}), name='payment-list'),
-    path('api/payments/<int:pk>/', views.PaymentViewSet.as_view({'get': 'retrieve'}), name='payment-detail'),
+   
     path('api/researcher-profiles/', views.ResearcherProfileViewSet.as_view({'get': 'list'}), name='researcherprofile-list'),
     path('api/researcher-profiles/<int:pk>/', views.ResearcherProfileViewSet.as_view({'get': 'retrieve'}), name='researcherprofile-detail'),
     path('api/users/', views.UserViewSet.as_view({'get': 'list'}), name='user-list'),
@@ -41,7 +58,9 @@ urlpatterns = [
     path('api/documents/', views.DocumentViewSet.as_view({'get': 'list'}), name='document-list'),
 
     # JWT Auth endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
 
@@ -51,6 +70,17 @@ urlpatterns = [
     path('api/current-user/', CurrentUserView.as_view(), name='current-user'),
     path('api/dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
 
+        # Custom endpoints for specific documents 
+    path('api/document/checklist/', views.DocumentChecklistView.as_view(), name='document-checklist'),
+    path('api/document/research-fee-structure/', views.DocumentResearchFeeStructureView.as_view(), name='document-research-fee-structure'),
+    path('api/document/zafiri-report-format/', views.DocumentZafiriReportFormatView.as_view(), name='document-zafiri-report-format'),
+    path('api/document/research-form/', views.DocumentResearchFormView.as_view(), name='document-research-form'),
+
+    path('api/document/research-proposal/', views.DocumentResearchProposalView.as_view(), name='document-research-proposal'),
+     
+
+
+    # path('api/profile/', views.UserProfileView.as_view(), name='user-profile'),
 
 
 
@@ -71,7 +101,21 @@ urlpatterns = [
         success_url='/reset/done/'
     ), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
+
+
+
+
+    path('api/payments/', views.payment_list, name='payment-list'),
+    path('api/payments/generate/', views.generate_payment, name='generate-payment'),
+
+
+
+ path('api/researcher-profiles/me/', views.ResearcherProfileMeView.as_view(), name='researcher-profile-me'),
 ]
+
+
+
 
 
 

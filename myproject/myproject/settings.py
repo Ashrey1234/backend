@@ -77,16 +77,18 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'zafirilast_db',
+        'NAME': 'ZafiriTop',
         'USER': 'postgres',
         'PASSWORD': '3838asks',
         'HOST': 'localhost',
         'PORT': '5432',
+        'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
 
 
 AUTH_USER_MODEL = 'myapp.User'
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -145,6 +147,24 @@ REST_FRAMEWORK = {
 
 
 
+APPEND_SLASH = True
+
+
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.SessionAuthentication',
+#         'rest_framework.authentication.TokenAuthentication',
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ],
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+# }
+
+
+
+
 
 
 # ALLOWED_HOSTS = [
@@ -164,6 +184,12 @@ REST_FRAMEWORK = {
 #     "http://127.0.0.1:5173",
 #     "http://192.168.1.237:5173",
 # ]
+
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 
 
 

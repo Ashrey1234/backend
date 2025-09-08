@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ResearcherProfile, Payment, Application, Attachment, Notification, Certificate, Document
+from .models import User, Payment, Application, Attachment, Notification, Certificate, Document, ResearcherProfile
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
 	pass
@@ -18,9 +18,30 @@ class UserAdmin(BaseUserAdmin):
 		('Custom Fields', {'fields': ('role', 'type', 'country')}),
 	)
 
+
+
+
+
+
+
+from django.contrib import admin
+from .models import ResearcherProfile
+
 @admin.register(ResearcherProfile)
 class ResearcherProfileAdmin(admin.ModelAdmin):
-	pass
+    list_display = ('user', 'department', 'position', 'institution')  # customize fields to show
+    search_fields = ('user__username', 'user__email', 'department', 'position', 'institution')
+    list_filter = ('department', 'institution')
+
+
+
+
+
+
+
+
+
+
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
@@ -41,3 +62,4 @@ class NotificationAdmin(admin.ModelAdmin):
 @admin.register(Certificate)
 class CertificateAdmin(admin.ModelAdmin):
 	pass
+
