@@ -82,7 +82,7 @@ DATABASES = {
         'PASSWORD': '3838asks',
         'HOST': 'localhost',
         'PORT': '5432',
-        'DISABLE_SERVER_SIDE_CURSORS': True,
+        # 'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
 

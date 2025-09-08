@@ -77,7 +77,9 @@ class Application(models.Model):
         default='Draft'
     )
     officer_feedback = models.TextField(blank=True, null=True)
-    submitted = models.CharField(max_length=100, blank=True, null=True)
+    # submitted = models.CharField(max_length=100, blank=True, null=True)
+    # submitted = models.CharField(max_length=100, blank=True, null=True)
+
     important = models.CharField(max_length=100, blank=True, null=True)
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -146,6 +148,17 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.control_number} - {self.researcher.username}"
+
+
+
+
+
+
+
+
+
+
+
 
 
 # ----------------------------

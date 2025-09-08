@@ -130,9 +130,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'researcher', 'applicant_name', 'title', 'category',
             'start_date', 'end_date', 'status', 'officer_feedback',
-            'submitted', 'important'
+            'important'
         ]
-
+# 'submitted', 
 
 
 
