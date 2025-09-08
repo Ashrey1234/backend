@@ -96,7 +96,7 @@ class Application(models.Model):
 # ----------------------------
 # Payment Model
 # ----------------------------
-class Payment(models.Model):
+class Payment(models.Model):          
     researcher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
     application = models.OneToOneField(
         Application,
@@ -148,9 +148,6 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.control_number} - {self.researcher.username}"
-
-
-
 
 
 
@@ -252,3 +249,4 @@ class ResearcherProfile(models.Model):
 
     def __str__(self):
         return self.name
+

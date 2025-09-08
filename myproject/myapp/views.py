@@ -484,3 +484,12 @@ def create_payment_simple(request):
             'success': False,
             'message': f'Error creating payment: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
+
+

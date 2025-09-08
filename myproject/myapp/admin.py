@@ -163,6 +163,36 @@ class PaymentAdmin(admin.ModelAdmin):
     list_filter = ('status', 'research_type', 'year')
     search_fields = ('control_number', 'researcher__username', 'researcher__email')
 
+
+
+
+
+
+
+
+
+# @admin.register(Payment)
+# class PaymentAdmin(admin.ModelAdmin):
+#     form = PaymentAdminForm
+#     raw_id_fields = ('application',)
+#     list_display = (
+#         'control_number',
+#         'researcher',
+#         'get_amount_with_currency',
+#         'status',
+#         'research_type',
+#         'level',
+#         'nationality',
+#         'generated_date'
+#     )
+#     list_filter = ('status', 'research_type', 'year', 'level', 'nationality')
+#     search_fields = ('control_number', 'researcher__username', 'researcher__email')
+
+#     def get_amount_with_currency(self, obj):
+#         return f"{obj.amount:,} {obj.currency}" if obj.amount and obj.currency else "-"
+#     get_amount_with_currency.short_description = 'Amount'
+
+
 # ----------------------------------
 # Application Admin
 # ----------------------------------
