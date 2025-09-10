@@ -491,50 +491,56 @@ def create_payment_simple(request):
 
 
 
-# ----------------------------
-# Function-Based Views
-# ----------------------------
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from .models import Application, Attachment
 from .serializers import ApplicationSerializer, AttachmentSerializer
 
+
+# ----------------------------
+# Application Views
+# ----------------------------
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def application_list(request):
-    if request.method == 'GET':
+    if request.user.is_staff:
+        applications = Application.objects.all()
+    else:
         applications = Application.objects.filter(researcher=request.user)
-        serializer = ApplicationSerializer(applications, many=True)
-        return Response(serializer.data)
-    
-    elif request.method == 'POST':
-        serializer = ApplicationSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+    serializer = ApplicationSerializer(applications, many=True, context={'request': request})
+    return Response(serializer.data)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def application_detail(request, pk):
-    application = get_object_or_404(Application, pk=pk, researcher=request.user)
-    
+    application = get_object_or_404(Application, pk=pk)
+
+    if not (request.user.is_staff or application.researcher == request.user):
+        return Response({'error': 'Not allowed'}, status=403)
+
     if request.method == 'GET':
-        serializer = ApplicationSerializer(application)
+        serializer = ApplicationSerializer(application, context={'request': request})
         return Response(serializer.data)
-    
+
     elif request.method == 'PUT':
+        if request.user != application.researcher:
+            return Response({'error': 'Only researcher can edit'}, status=403)
         serializer = ApplicationSerializer(application, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
-    
+
     elif request.method == 'DELETE':
+        if request.user != application.researcher:
+            return Response({'error': 'Only researcher can delete'}, status=403)
         application.delete()
         return Response(status=204)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -547,63 +553,161 @@ def application_submit(request, pk):
         return Response({'status': 'application submitted'})
     return Response({'error': 'Application already submitted'}, status=400)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def application_approve(request, pk):
     if not request.user.is_staff:
         return Response(status=403)
-    
     application = get_object_or_404(Application, pk=pk)
     application.status = 'Approved'
     application.save()
-    return Response({'status': 'application approved'})
+    return Response({'status': f'Application approved for {application.researcher.username}'})
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def application_reject(request, pk):
     if not request.user.is_staff:
         return Response(status=403)
-    
     application = get_object_or_404(Application, pk=pk)
     application.status = 'Rejected'
     application.officer_feedback = request.data.get('feedback', '')
     application.save()
-    return Response({'status': 'application rejected'})
+    return Response({'status': f'Feedback sent to {application.researcher.username}'})
 
+
+# ----------------------------
+# Attachment Views
+# ----------------------------
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def attachment_list(request, application_pk):
-    application = get_object_or_404(Application, pk=application_pk, researcher=request.user)
-    
+    application = get_object_or_404(Application, pk=application_pk)
+
+    if not (request.user.is_staff or application.researcher == request.user):
+        return Response({'error': 'Not allowed'}, status=403)
+
     if request.method == 'GET':
         attachments = Attachment.objects.filter(application=application)
-        serializer = AttachmentSerializer(attachments, many=True)
+        serializer = AttachmentSerializer(attachments, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
     elif request.method == 'POST':
+        if request.user != application.researcher:
+            return Response({'error': 'Only researcher can upload attachments'}, status=403)
         serializer = AttachmentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save(application=application)
+            serializer.save(application=application, file_path=request.FILES.get('file_path'))
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def attachment_detail(request, application_pk, pk):
-    application = get_object_or_404(Application, pk=application_pk, researcher=request.user)
+    application = get_object_or_404(Application, pk=application_pk)
+
+    if not (request.user.is_staff or application.researcher == request.user):
+        return Response({'error': 'Not allowed'}, status=403)
+
     attachment = get_object_or_404(Attachment, pk=pk, application=application)
-    
+
     if request.method == 'GET':
-        serializer = AttachmentSerializer(attachment)
+        serializer = AttachmentSerializer(attachment, context={'request': request})
         return Response(serializer.data)
-    
+
     elif request.method == 'PUT':
-        serializer = AttachmentSerializer(attachment, data=request.data)
+        if request.user != application.researcher:
+            return Response({'error': 'Only researcher can update attachment'}, status=403)
+        serializer = AttachmentSerializer(attachment, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(file_path=request.FILES.get('file_path'))
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        if request.user != application.researcher:
+            return Response({'error': 'Only researcher can delete attachment'}, status=403)
+        attachment.delete()
+        return Response(status=204)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import Certificate
+from .serializers import CertificateSerializer
+from django.utils import timezone
+
+# ----------------------------
+# Certificate Views
+# ----------------------------
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def certificate_list(request):
+    """
+    List all certificates (staff) or user's own (researcher) 
+    / Create new certificate
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            certificates = Certificate.objects.all()
+        else:
+            certificates = Certificate.objects.filter(researcher=request.user)
+        serializer = CertificateSerializer(certificates, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = CertificateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            # Automatically set researcher to current user if not staff
+            if not request.user.is_staff:
+                serializer.save(researcher=request.user, issued_date=timezone.now())
+            else:
+                # Staff can set researcher manually
+                serializer.save(issued_date=timezone.now())
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def certificate_detail(request, pk):
+    """
+    Retrieve, update, or delete a certificate
+    """
+    certificate = get_object_or_404(Certificate, pk=pk)
+
+    # Permission: researcher can only access their own certificate
+    if not request.user.is_staff and certificate.researcher != request.user:
+        return Response({'error': 'Not allowed'}, status=403)
+
+    if request.method == 'GET':
+        serializer = CertificateSerializer(certificate, context={'request': request})
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = CertificateSerializer(certificate, data=request.data, context={'request': request}, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
-    
+
     elif request.method == 'DELETE':
-        attachment.delete()
-        return Response(status=204)
+        certificate.delete()
+        return Response({'status': 'Certificate deleted'}, status=204)

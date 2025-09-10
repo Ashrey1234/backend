@@ -200,19 +200,75 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 
-# Application Admin
+# # Application Admin
+# @admin.register(Application)
+# class ApplicationAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'title', 'researcher', 'status', 'officer_feedback', 'submitted_at')
+#     search_fields = ('title', 'researcher__username', 'status', 'officer_feedback')
+#     list_filter = ('status', 'category')  # Fixed: removed the trailing comma that created a tuple of tuples
+
+# @admin.register(Application)      asubuhiii
+# class ApplicationAdmin(admin.ModelAdmin):
+#     list_display = (
+#         'id', 'title', 'researcher', 'research_type', 
+#         'status', 'officer_feedback', 'submitted_at'
+#     )
+#     search_fields = (
+#         'title', 'researcher__username', 'status', 
+#         'officer_feedback', 'research_type'
+#     )
+#     list_filter = ('status', 'category', 'research_type')
+
+
+
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'researcher', 'status', 'officer_feedback', 'submitted_at')
-    search_fields = ('title', 'researcher__username', 'status', 'officer_feedback')
-    list_filter = ('status', 'category')  # Fixed: removed the trailing comma that created a tuple of tuples
+    list_display = (
+        'id', 'title', 'researcher', 'research_type', 'year',
+        'status', 'officer_feedback', 'submitted_at'
+    )
+    search_fields = (
+        'title', 'researcher__username', 'status', 
+        'officer_feedback', 'research_type', 'description',
+        'objectives', 'methodology', 'expected_outcomes'
+    )
+    list_filter = ('status', 'category', 'research_type', 'year')
 
-# Attachment Admin
+
+
+# # Attachment Admin
+# @admin.register(Attachment)
+# class AttachmentAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'application', 'file_type', 'file_path', 'uploaded_at')
+#     search_fields = ('application__title', 'file_type', 'original_filename')
+#     list_filter = ('file_type',)  # This is correct - the comma makes it a tuple with one element
+
+# @admin.register(Attachment)    asubuhi
+# class AttachmentAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'application', 'file_type', 'file_path', 'uploaded_at')
+#     search_fields = ('application__title', 'file_type', 'original_filename')
+#     list_filter = ('file_type',)
+
+
+
+
+
+
+from django.utils.html import format_html
+
 @admin.register(Attachment)
 class AttachmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'application', 'file_type', 'file_path', 'uploaded_at')
+    list_display = ('id', 'application', 'file_type', 'uploaded_file', 'uploaded_at')
     search_fields = ('application__title', 'file_type', 'original_filename')
-    list_filter = ('file_type',)  # This is correct - the comma makes it a tuple with one element
+    list_filter = ('file_type',)
+
+    def uploaded_file(self, obj):
+        if obj.file_path:
+            return format_html('<a href="{}" target="_blank">{}</a>', obj.file_path.url, obj.original_filename or obj.file_path.name)
+        return "-"
+    uploaded_file.short_description = "File"
+
+
 
 # ----------------------------------
 # Notification Admin

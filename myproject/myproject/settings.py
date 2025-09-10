@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp',
+    # 'myapp',
+    'myapp.apps.MyappConfig',
     'rest_framework',
     'corsheaders',
 ]
@@ -132,6 +133,11 @@ STATIC_URL = 'static/'
 # Media files (user uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+
+CORS_ALLOW_ALL_ORIGINS = True 
 
 # Default primary key field type
 # Default primary key field type
