@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Form Validation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    button {
+      margin-right: 10px;
+      padding: 5px 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="myform" onsubmit="return my6form()">
+    <h2>FORM VALIDATION</h2>
+    <table>
+      <tr>
+        <td>Full Name:</td>
+        <td><input type="text" id="name" name="FName" /></td>
+      </tr>
+      <tr>
+        <td>Email:</td>
+        <td><input type="email" id="email" /></td>
+      </tr>
+      <tr>
+        <td>Password:</td>
+        <td><input type="password" id="password" /></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button type="submit">Submit</button>
+          <button type="button" onclick="clearForm()">Clear</button>
+        </td>
+      </tr>
+    </table>
+    <p id="message"></p>
+  </form>
+
+  <script>
+    function my6form() {
+      const fullName = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const message = document.getElementById("message");
+
+      message.style.color = "red";
+      message.textContent = "";
+
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+      if (fullName === "" || fullName.length > 20) {
+        message.textContent = "Please enter your name (max 20 characters).";
+        return false;
+      }
+
+      if (email === "") {
+        message.textContent = "Please enter your email.";
+        return false;
+      }
+
+      if (!emailPattern.test(email)) {
+        message.textContent = "Please enter a valid email address.";
+        return false;
+      }
+
+      if (password === "" || password.length < 6 || password.length > 8) {
+        message.textContent = "Password must be 6 to 8 characters.";
+        return false;
+      }
+
+      // Success
+      message.style.color = "green";
+      message.textContent = "Form submitted successfully!";
+      document.getElementById("myform").reset();
+      return false; // ili usirefresh ukurasa
+    }
+
+    function clearForm() {
+      document.getElementById("myform").reset();
+      document.getElementById("message").textContent = "";
+    }
+  </script>
+
+</body>
+</html>

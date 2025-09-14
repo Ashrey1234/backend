@@ -119,18 +119,53 @@ class DocumentAdmin(admin.ModelAdmin):
 # ----------------------------------
 # User Admin
 # ----------------------------------
+# @admin.register(User)
+# class UserAdmin(BaseUserAdmin):
+#     list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'type', 'is_staff', 'is_superuser', 'is_active')
+#     list_filter = ('role', 'type', 'is_staff', 'is_superuser', 'is_active')
+#     search_fields = ('username', 'email', 'first_name', 'last_name', 'role', 'type')
+
+#     fieldsets = BaseUserAdmin.fieldsets + (
+#         ('Custom Fields', {'fields': ('role', 'type', 'country')}),
+#     )
+#     add_fieldsets = BaseUserAdmin.add_fieldsets + (
+#         ('Custom Fields', {'fields': ('role', 'type', 'country')}),
+#     )
+
+
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import User
+
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'type', 'is_staff', 'is_superuser', 'is_active')
+    list_display = (
+        'username', 'email', 'first_name', 'last_name',
+        'role', 'type', 'phone_number', 'country',
+        'is_staff', 'is_superuser', 'is_active'
+    )
     list_filter = ('role', 'type', 'is_staff', 'is_superuser', 'is_active')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'role', 'type')
+    search_fields = (
+        'username', 'email', 'first_name', 'last_name',
+        'role', 'type', 'phone_number', 'country'
+    )
 
     fieldsets = BaseUserAdmin.fieldsets + (
-        ('Custom Fields', {'fields': ('role', 'type', 'country')}),
+        ('Custom Fields', {'fields': (
+            'role', 'type', 'country', 'phone_number',
+            'gender', 'research_type', 'profile_completion',
+            'first_login',
+        )}),
     )
+
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        ('Custom Fields', {'fields': ('role', 'type', 'country')}),
+        ('Custom Fields', {'fields': (
+            'role', 'type', 'country', 'phone_number',
+            'gender', 'research_type', 'profile_completion',
+            'first_login',
+        )}),
     )
+
 
 # ----------------------------------
 # ResearcherProfile Admin
@@ -155,15 +190,52 @@ class PaymentAdminForm(forms.ModelForm):
         self.fields['application'].queryset = Application.objects.all()
 
 
+# @admin.register(Payment)
+# class PaymentAdmin(admin.ModelAdmin):
+#     form = PaymentAdminForm
+#     raw_id_fields = ('application',)
+#     list_display = ('control_number', 'researcher', 'amount', 'status', 'generated_date')
+#     list_filter = ('status', 'research_type', 'year')
+#     search_fields = ('control_number', 'researcher__username', 'researcher__email')
+
+
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     form = PaymentAdminForm
     raw_id_fields = ('application',)
-    list_display = ('control_number', 'researcher', 'amount', 'status', 'generated_date')
-    list_filter = ('status', 'research_type', 'year')
-    search_fields = ('control_number', 'researcher__username', 'researcher__email')
-
-
+    
+    # Display important fields in the list view
+    list_display = (
+        'control_number',
+        'researcher',
+        'category',
+        'level',
+        'nationality',
+        'research_type',
+        'amount',
+        'status',
+        'generated_date'
+    )
+    
+    # Add filters for easier searching
+    list_filter = (
+        'status',
+        'research_type',
+        'year',
+        'category',
+        'level',
+        'nationality'
+    )
+    
+    # Search fields
+    search_fields = (
+        'control_number',
+        'researcher__username',
+        'researcher__email',
+        'category',
+        'level',
+        'nationality'
+    )
 
 
 

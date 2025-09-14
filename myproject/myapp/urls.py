@@ -141,7 +141,9 @@
 
 
 from django.urls import path, include
+from .views import ProfileDashboard
 from django.contrib.auth import views as auth_views
+from .views import ResearcherStatsView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from . import views
@@ -160,6 +162,14 @@ router.register(r'certificates', views.CertificateViewSet)
 urlpatterns = [
     # Router URLs
     path('api/', include(router.urls)),
+
+      # ✅ ProfileDashboard under /api/
+    path('api/profile/dashboard/', ProfileDashboard.as_view(), name='profile-dashboard'),
+   
+    path('api/researcher/stats/', ResearcherStatsView.as_view(), name='researcher-stats'),
+
+
+    # path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
 
     # Certificates (explicit endpoints for clarity)
     path('api/certificates/', views.CertificateViewSet.as_view({'get': 'list'}), name='certificate-list'),
@@ -219,6 +229,8 @@ urlpatterns = [
     path('api/payments/generate/', views.generate_payment, name='generate-payment'),
 
     # Applications and attachments
+    path('api/applications/<int:pk>/certificate/', views.ApplicationCertificateView.as_view(), name='application-certificate'),
+
     path('api/applications/', views.application_list, name='application-list'),
     path('api/applications/<int:pk>/', views.application_detail, name='application-detail'),
     path('api/applications/<int:pk>/submit/', views.application_submit, name='application-submit'),
@@ -226,6 +238,10 @@ urlpatterns = [
     path('api/applications/<int:pk>/reject/', views.application_reject, name='application-reject'),
     path('api/applications/<int:application_pk>/attachments/', views.attachment_list, name='attachment-list'),
     path('api/applications/<int:application_pk>/attachments/<int:pk>/', views.attachment_detail, name='attachment-detail'),
+
+    path('verify_certificate/<int:application_id>/', views.verify_certificate, name='verify_certificate'),
+
+    
 ]
 
 

@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ZafiriTop',
+        'NAME': 'Reserchers_db',
         'USER': 'postgres',
         'PASSWORD': '3838asks',
         'HOST': 'localhost',
