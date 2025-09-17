@@ -1,3 +1,4 @@
+    
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -294,13 +295,6 @@ class RegisterView(generics.CreateAPIView):
 
 
 
-
-
-
-
-
-
-
 from rest_framework import generics, permissions
 from .models import ResearcherProfile
 from .serializers import ResearcherProfileSerializer
@@ -316,24 +310,11 @@ class ResearcherProfileMeView(generics.RetrieveUpdateAPIView):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import MyTokenObtainPairSerializer
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-
 
 
 
@@ -346,6 +327,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import Payment, Application
 from .serializers import PaymentSerializer, GeneratePaymentSerializer
+
 
 # ----------------------------
 # Create payment (full)
@@ -383,20 +365,23 @@ def create_payment(request):
             'message': f'Error creating payment: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# ----------------------------
-# Create payment simple
-# ----------------------------
+
+
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_payment_simple(request):
     """
-    Simple way to create payment - auto-fills category, level, nationality
+    Simple way to create payment - auto-fills category, ensures level & nationality are valid
     """
     try:
         serializer = GeneratePaymentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         research_type = serializer.validated_data['research_type']
         year = serializer.validated_data['year']
+        level = serializer.validated_data['level'] or 'Other'       # default
+        nationality = serializer.validated_data['nationality'] or 'Local' # default
         application_id = serializer.validated_data.get('application_id')
 
         application = None
@@ -416,8 +401,8 @@ def create_payment_simple(request):
             research_type=research_type,
             year=year,
             category=category,
-            level=getattr(request.user, 'education_level', None),
-            nationality=getattr(request.user, 'nationality', None),
+            level=level,
+            nationality=nationality,
             application=application,
             expiry_date=timezone.now() + timedelta(days=180)
         )
@@ -434,6 +419,8 @@ def create_payment_simple(request):
             'success': False,
             'message': f'Error creating payment: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 # ----------------------------
 # Get all user payments
@@ -454,6 +441,7 @@ def get_user_payments(request):
             'success': False,
             'message': f'Error fetching payments: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # ----------------------------
 # Get payment detail
@@ -481,13 +469,6 @@ def get_payment_detail(request, payment_id):
 
 
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from .models import Application, Attachment
-from .serializers import ApplicationSerializer, AttachmentSerializer
 
 
 # ----------------------------
@@ -721,6 +702,7 @@ from .models import Certificate
 from django.utils import timezone
 
 
+from django.db import transaction
 
 class ApplicationApproveView(APIView):
     permission_classes = [IsAuthenticated]
@@ -735,25 +717,25 @@ class ApplicationApproveView(APIView):
             return Response({'error': 'Application cannot be approved'}, status=400)
 
         feedback = request.data.get('feedback', '')
-        application.officer_feedback = feedback
-        application.status = 'Approved'
-        application.approved_at = timezone.now()
-        application.save()
 
-        # Generate Certificate
-        certificate, created = Certificate.objects.get_or_create(
-            application=application,
-            defaults={
-                'certificate_number': f"CERT-{application.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}",
-                'officer_feedback': feedback
-            }
-        )
+        # Ensure atomic save + PDF generation
+        with transaction.atomic():
+            application.officer_feedback = feedback
+            application.status = 'Approved'
+            application.approved_at = timezone.now()
+            application.save()
+
+            # Generate Certificate PDF immediately
+            create_certificate_pdf(application)
+
+        certificate_instance = getattr(application, 'certificate', None)
 
         return Response({
             'success': True,
             'message': 'Application approved and certificate generated',
-            'certificate': CertificateSerializer(certificate).data
+            'certificate': CertificateSerializer(certificate_instance).data if certificate_instance else None
         }, status=200)
+
 
 
 from rest_framework.views import APIView
@@ -774,31 +756,6 @@ import os
 
 
 # views.py
-# class ApplicationCertificateView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, pk):
-#         try:
-#             application = Application.objects.get(pk=pk)
-#         except Application.DoesNotExist:
-#             raise Http404("Application not found")
-
-#         if not hasattr(application, "certificate") or not application.certificate:
-#             raise Http404("Certificate not generated yet")
-
-#         cert = application.certificate
-#         certificate_path = cert.file_path.path
-
-#         if not os.path.exists(certificate_path):
-#             raise Http404("Certificate file not found on server")
-
-#         return FileResponse(
-#             open(certificate_path, "rb"),
-#             content_type="application/pdf",
-#             as_attachment=True,
-#             filename=os.path.basename(certificate_path)
-#         )
-
 
 
 from rest_framework.views import APIView
@@ -900,9 +857,7 @@ class ProfileDashboard(APIView):
 
 
 
-
-
-        # views.py
+# myapp/views.py
 from django.shortcuts import render, get_object_or_404
 from .models import Application
 
@@ -916,6 +871,35 @@ def verify_certificate(request, application_id):
         "issued_date": certificate.issued_date.strftime("%Y-%m-%d") if certificate else "N/A"
     }
     return render(request, "verify_certificate.html", context)
+
+
+
+           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -96,9 +96,7 @@ class ResearcherProfileSerializer(serializers.ModelSerializer):
 
 
 
-
-
-
+# serializers.py          
 import datetime
 from rest_framework import serializers
 from .models import Payment, Application
@@ -108,6 +106,19 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = '__all__'
         read_only_fields = ('control_number', 'amount', 'expiry_date', 'generated_date', 'researcher')
+
+    def validate_level(self, value):
+        allowed = ['Undergraduate', 'Graduate', 'PhD', 'Other']
+        if value not in allowed:
+            return 'Other'
+        return value
+
+    def validate_nationality(self, value):
+        allowed = ['Local', 'Foreign']
+        if value not in allowed:
+            return 'Local'
+        return value
+
 
 class GeneratePaymentSerializer(serializers.Serializer):
     research_type = serializers.ChoiceField(choices=[
@@ -119,11 +130,15 @@ class GeneratePaymentSerializer(serializers.Serializer):
         min_value=2000,
         max_value=datetime.datetime.now().year + 5
     )
+    level = serializers.ChoiceField(
+        choices=[('Undergraduate','Undergraduate'), ('Graduate','Graduate'), ('PhD','PhD'), ('Other','Other')],
+        required=True
+    )
+    nationality = serializers.ChoiceField(
+        choices=[('Local','Local'), ('Foreign','Foreign')],
+        required=True
+    )
     application_id = serializers.IntegerField(required=False)
-
-
-
-
 
 
 
@@ -202,16 +217,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 
 
-# serializers.py
-# from rest_framework import serializers
-# from .models import Certificate
-
-# class CertificateSerializer(serializers.ModelSerializer):
-#     officer_feedback = serializers.CharField(read_only=True)  # 🔹Include this
-
-#     class Meta:
-#         model = Certificate
-#         fields = ['id', 'application', 'certificate_number', 'file_path', 'issued_date', 'officer_feedback']
 
 from rest_framework import serializers
 from .models import Certificate

@@ -141,13 +141,24 @@ class Payment(models.Model):
     generated_date = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
+        # Set defaults if missing
+        if not self.level:
+            self.level = 'Other'
+        if not self.nationality:
+            self.nationality = 'Local'
+
         # Auto-fill category from Application
         if self.application and hasattr(self.application, 'category') and not self.category:
             self.category = self.application.category
+
+        # Auto-generate control number
         if not self.control_number:
             self.control_number = self.generate_control_number()
+
+        # Auto-calculate amount
         if not self.amount or self.amount == 0:
             self.amount = self.calculate_fee()
+
         super().save(*args, **kwargs)
 
     def generate_control_number(self):
@@ -163,6 +174,21 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.control_number} - {self.researcher.username}"
+
+
+
+
+
+
+
+# def mark_as_used(self):
+#         """Mark payment as used when associated with an application"""
+#         self.used_for_application = True
+#         self.save()
+
+
+
+
 
 # ----------------------------
 # Attachment Model
@@ -225,18 +251,6 @@ class Notification(models.Model):
 # # ----------------------------
 
 
-
-
-# models.py
-# class Certificate(models.Model):
-#     application = models.OneToOneField(Application, on_delete=models.CASCADE, related_name='certificate')
-#     certificate_number = models.CharField(max_length=50)
-#     file_path = models.FileField(upload_to='certificates/')
-#     issued_date = models.DateTimeField(default=timezone.now)
-#     officer_feedback = models.TextField(blank=True, null=True)  # 🔹Add this
-
-#     def __str__(self):
-#         return f"Certificate {self.certificate_number} - {self.application.title}"
 
 
 

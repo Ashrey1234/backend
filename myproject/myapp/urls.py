@@ -169,6 +169,10 @@ urlpatterns = [
     path('api/researcher/stats/', ResearcherStatsView.as_view(), name='researcher-stats'),
 
 
+   
+
+
+
     # path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
 
     # Certificates (explicit endpoints for clarity)
@@ -227,6 +231,9 @@ urlpatterns = [
     # Payments
     path('api/payments/', views.payment_list, name='payment-list'),
     path('api/payments/generate/', views.generate_payment, name='generate-payment'),
+    path('api/payments/simple/', views.create_payment_simple, name='create-payment-simple'),
+    # path('api/payments/<int:payment_id>/verify/', views.verify_payment, name='verify_payment'),
+
 
     # Applications and attachments
     path('api/applications/<int:pk>/certificate/', views.ApplicationCertificateView.as_view(), name='application-certificate'),

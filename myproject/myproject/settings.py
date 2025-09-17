@@ -197,6 +197,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "10.176.247.177"]
+
+
+
+
 
 
 
