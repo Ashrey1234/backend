@@ -144,6 +144,8 @@ from django.urls import path, include
 from .views import ProfileDashboard
 from django.contrib.auth import views as auth_views
 from .views import ResearcherStatsView
+
+from .views import DashboardStatsView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from . import views
@@ -247,6 +249,10 @@ urlpatterns = [
     path('api/applications/<int:application_pk>/attachments/<int:pk>/', views.attachment_detail, name='attachment-detail'),
 
     path('verify_certificate/<int:application_id>/', views.verify_certificate, name='verify_certificate'),
+
+
+
+    path("dashboard-stats/", DashboardStatsView.as_view(), name="dashboard-stats"),
 
     
 ]

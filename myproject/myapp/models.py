@@ -178,31 +178,26 @@ class Payment(models.Model):
 
 
 
-
-
-
-# def mark_as_used(self):
-#         """Mark payment as used when associated with an application"""
-#         self.used_for_application = True
-#         self.save()
-
-
-
-
-
 # ----------------------------
 # Attachment Model
 # ----------------------------
+
+
 class Attachment(models.Model):
     application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='attachments')
     file_type = models.CharField(
         max_length=50,
-        choices=[('Makamu Form', 'Makamu Form'), ('Proposal', 'Proposal'), ('Ethical Form', 'Ethical Form')]
+        choices=[
+            ('Vice President Form', 'Vice President Form'),
+            ('Proposal', 'Proposal'),
+            ('Ethical Form', 'Ethical Form')
+        ]
     )
     file_path = models.FileField(upload_to='attachments/%Y/%m/')
     uploaded_at = models.DateTimeField(default=timezone.now)
     original_filename = models.CharField(max_length=255, default="unknown")
     file_size = models.PositiveIntegerField(default=0)
+
 
     class Meta:
         unique_together = ('application', 'file_type')

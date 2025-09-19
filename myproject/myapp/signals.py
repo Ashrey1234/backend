@@ -488,7 +488,8 @@ def create_certificate_pdf(application_instance):
             c.drawImage(sig, sig_x, sig_y, width=sig_width, height=sig_height, mask='auto')
 
             # Officer name & title
-            officer_name = "Dr. Aisha Salim Ali"
+            # officer_name = "Dr. Aisha Salim Ali"
+            officer_name = "Ali Salim Ali"
             officer_title = "Research Officer"
             c.setFont("Helvetica-Bold", 12)
             c.drawCentredString(sig_x + sig_width / 2, sig_y - 15, officer_name)

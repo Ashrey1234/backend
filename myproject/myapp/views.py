@@ -738,6 +738,57 @@ class ApplicationApproveView(APIView):
 
 
 
+
+
+
+
+
+
+
+class ApplicationApproveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            application = Application.objects.get(pk=pk)
+        except Application.DoesNotExist:
+            return Response({'error': 'Application not found'}, status=404)
+
+        if application.status != 'Pending':
+            return Response({'error': 'Application cannot be approved'}, status=400)
+
+        feedback = request.data.get('feedback', '')
+
+        # 1. Save feedback to Application
+        application.officer_feedback = feedback
+        application.status = 'Approved'
+        application.approved_at = timezone.now()
+        application.save()
+
+        # 2. CRITICAL: Save feedback to Certificate model
+        certificate, created = Certificate.objects.update_or_create(
+            application=application,
+            defaults={
+                'officer_feedback': feedback,
+                'certificate_number': f"CERT-{application.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+            }
+        )
+
+        # 3. Generate PDF
+        create_certificate_pdf(application)
+
+        return Response({
+            'success': True,
+            'message': 'Application approved and certificate generated',
+            'certificate': CertificateSerializer(certificate).data
+        }, status=200)
+
+
+
+
+
+
+
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.http import FileResponse, Http404
@@ -821,6 +872,7 @@ class ResearcherStatsView(APIView):
 
 
 
+
 # views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -871,6 +923,82 @@ def verify_certificate(request, application_id):
         "issued_date": certificate.issued_date.strftime("%Y-%m-%d") if certificate else "N/A"
     }
     return render(request, "verify_certificate.html", context)
+
+
+
+
+
+
+
+
+
+
+
+
+#     from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework.permissions import IsAuthenticated
+# from .models import Application  # hakikisha ume-import model yako ya Application
+
+# class DashboardStatsView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         # jumla zote
+#         total_applications = Application.objects.count()
+
+#         # breakdown kwa status
+#         pending = Application.objects.filter(status="Pending").count()
+#         approved = Application.objects.filter(status="Approved").count()
+#         rejected = Application.objects.filter(status="Rejected").count()
+
+#         return Response({
+#             "applications_total": total_applications,
+#             "applications_pending": pending,
+#             "applications_approved": approved,
+#             "applications_rejected": rejected,
+#         })
+
+
+
+
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Application  # hakikisha Application model ipo na ina field researcher
+
+class DashboardStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # chukua applications za user huyu tu
+        user_apps = Application.objects.filter(researcher=request.user)
+
+        total_applications = user_apps.count()
+        pending = user_apps.filter(status="Pending").count()
+        approved = user_apps.filter(status="Approved").count()
+        rejected = user_apps.filter(status="Rejected").count()
+
+        return Response({
+            "applications_total": total_applications,
+            "applications_pending": pending,
+            "applications_approved": approved,
+            "applications_rejected": rejected,
+        })
+
+
+
+
+
+
+
+
+
+
+
 
 
 
